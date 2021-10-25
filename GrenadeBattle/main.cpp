@@ -46,6 +46,7 @@ int main()
 	{
 		sf::Time frameTime = gameClock.restart();
 		float deltaTime = frameTime.asSeconds();
+
 		//INPUT
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -62,7 +63,6 @@ int main()
 
 		PlayerOneInput(playerAcceleration, ACCEL_RATE, jumpForce);
 		PlayerTwoInput(playerTwoAcceleration, ACCEL_RATE, jumpForce);
-
 
 		if (event.type == sf::Event::KeyPressed)
 		{
