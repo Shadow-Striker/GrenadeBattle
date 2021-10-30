@@ -4,9 +4,9 @@
 #include <iostream>
 #include <string>
 
-void PlayerOneInput(sf::Vector2f & _playerAcceleration, float _ACCEL_RATE, float _jumpForce);
-void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, float _jumpForce);
-void PlayerOneMovement(sf::Vector2f _playerVelocity, sf::Vector2f &_playerAcceleration, float _deltaTime, sf::Vector2f _playerPosition, float _drag);
+void PlayerOneInput(sf::Vector2f & _playerAcceleration, float _ACCEL_RATE, float & _jumpForce);
+void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, float & _jumpForce);
+void PlayerOneMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag);
 
 int main()
 {
@@ -91,11 +91,11 @@ int main()
 	return 0;
 }
 
-void PlayerOneInput(sf::Vector2f &_playerAcceleration, float _ACCEL_RATE, float _jumpForce)
+void PlayerOneInput(sf::Vector2f & _playerAcceleration, float _ACCEL_RATE, float & _jumpForce)
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
-		_playerAcceleration.x = -_ACCEL_RATE;
+	    _playerAcceleration.x = -_ACCEL_RATE;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
@@ -107,7 +107,7 @@ void PlayerOneInput(sf::Vector2f &_playerAcceleration, float _ACCEL_RATE, float 
 	}
 }
 
-void PlayerTwoInput(sf::Vector2f &_playerTwoAcceleration, float _ACCEL_RATE, float _jumpForce)
+void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, float & _jumpForce)
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
@@ -123,7 +123,7 @@ void PlayerTwoInput(sf::Vector2f &_playerTwoAcceleration, float _ACCEL_RATE, flo
 	}
 }
 
-void PlayerOneMovement(sf::Vector2f _playerVelocity, sf::Vector2f &_playerAcceleration, float _deltaTime, sf::Vector2f _playerPosition, float _drag)
+void PlayerOneMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag)
 {
 	sf::Vector2f deltaVelocity = _playerAcceleration * _deltaTime;
 	_playerVelocity += deltaVelocity;
