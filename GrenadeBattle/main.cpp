@@ -1,13 +1,15 @@
 #include <SFML/Graphics.hpp>
 #include <Math.h>
+#include <Player.h>
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <string>
 
 void PlayerOneInput(sf::Vector2f & _playerAcceleration, float _ACCEL_RATE, float & _jumpForce);
 void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, float & _jumpForce);
-void PlayerOneMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag);
+void PlayerMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag);
 bool IntersectCheck(sf::Vector2f _spherePos, sf::Vector2f _otherPos, float _radius);
+void Intersect(sf::FloatRect _playerRect, sf::FloatRect _playerTwoRect, sf::Vector2f _playerCenter, sf::Vector2f _playerTwoCenter, sf::Vector2f _colDepth, sf::Vector2f _playerPos, sf::Vector2f _playerVelocity);
 
 int main()
 {
@@ -15,6 +17,7 @@ int main()
 	sf::Texture playerTexture;
 	playerTexture.loadFromFile("Assets/Sprites/boy.png");
 
+/* Player Code
 	//---- PLAYER ONE CODE ----
 	sf::Sprite playerSprite;
 	playerSprite.setTexture(playerTexture);
@@ -50,6 +53,11 @@ int main()
 	playerTwoSprite.setScale(.1f, .1f);
 	sf::Vector2f playerTwoPosition = sf::Vector2f(300.0f, 200.0f);
 	playerTwoSprite.setPosition(playerTwoPosition);
+
+	//Velocity
+	sf::Vector2f playerTwoVelocity = sf::Vector2f(200.0f, 0.0f);
+
+	//Gravity times 2 is being applied in playerAcceleration.
 	sf::Vector2f playerTwoAcceleration = sf::Vector2f(0.0f, 0.0f);
 
 	//Rect
@@ -65,6 +73,9 @@ int main()
 	sf::Vector2f playerTwoCenter = sf::Vector2f(0.0f, 0.0f);
 
 	//---- END OF PLAYER TWO CODE ----
+*/
+
+	Player playerOne();
 
 	float jumpForce = 100.0f;
 	float playerSpeed = 3000.0f;
@@ -108,14 +119,21 @@ int main()
 		}
 		//UPDATE
 		//Velocity code
-		PlayerOneMovement(playerVelocity, playerAcceleration, deltaTime, playerPosition, drag);
-		
+		PlayerMovement(playerVelocity, playerAcceleration, deltaTime, playerPosition, drag);
+		PlayerMovement(playerTwoVelocity, playerTwoAcceleration, deltaTime, playerTwoPosition, drag);
+
 		if (playerPosition.y >= 500.0f)
 		{
 			playerPosition.y = 500.0f;
 		}
 
+		if (playerTwoPosition.y >= 500.0f)
+		{
+			playerTwoPosition.y = 500.0f;
+		}
+
 		playerSprite.setPosition(playerPosition);
+		playerTwoSprite.setPosition(playerTwoPosition);
 
 		if (playerRect.intersects(playerTwoRect))
 		{
@@ -164,7 +182,7 @@ void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, fl
 	}
 }
 
-void PlayerOneMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag)
+void PlayerMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag)
 {
 	sf::Vector2f deltaVelocity = _playerAcceleration * _deltaTime;
 	_playerVelocity += deltaVelocity;
