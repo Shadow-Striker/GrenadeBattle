@@ -8,8 +8,7 @@ void PlayerOneInput(sf::Vector2f & _playerAcceleration, float _ACCEL_RATE, float
 void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, float & _jumpForce);
 void PlayerMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag);
 bool IntersectCheck(sf::Vector2f _spherePos, sf::Vector2f _otherPos, float _radius);
-void Intersect(sf::FloatRect _playerRect, sf::FloatRect _playerTwoRect, sf::Vector2f _playerCenter, sf::Vector2f _playerTwoCenter, sf::Vector2f _colDepth, sf::Vector2f _playerPos, sf::Vector2f _playerVelocity);
-void IntersectTwo(sf::FloatRect & _playerRect, sf::FloatRect & _playerTwoRect, sf::Vector2f & _playerCenter, sf::Vector2f & _playerTwoCenter, sf::Vector2f & _colDepth, sf::Vector2f & _playerPos, sf::Vector2f & _playerVelocity, sf::RectangleShape & _playerRectDisplay, sf::RectangleShape & _playerTwoRectDisplay);
+void Intersect(sf::FloatRect & _playerRect, sf::FloatRect & _playerTwoRect, sf::Vector2f & _playerCenter, sf::Vector2f & _playerTwoCenter, sf::Vector2f & _colDepth, sf::Vector2f & _playerPos, sf::Vector2f & _playerVelocity, sf::RectangleShape & _playerRectDisplay, sf::RectangleShape & _playerTwoRectDisplay);
 
 int main()
 {
@@ -183,7 +182,7 @@ int main()
 
 		if (playerRect.intersects(playerTwoRect))
 		{
-			IntersectTwo(playerRect, playerTwoRect, playerCenter, playerTwoCenter, colDepth, playerPosition, playerVelocity, playerRectDisplay, playerTwoRectDisplay);
+			Intersect(playerRect, playerTwoRect, playerCenter, playerTwoCenter, colDepth, playerPosition, playerVelocity, playerRectDisplay, playerTwoRectDisplay);
 			playerSprite.setPosition(playerPosition);
 			playerTwoSprite.setPosition(playerTwoPosition);
 		}
@@ -259,46 +258,7 @@ bool IntersectCheck(sf::Vector2f _spherePos, sf::Vector2f _otherPos, float _radi
 	return (distance < (_radius + _radius));
 }
 
-void Intersect(sf::FloatRect _playerRect, sf::FloatRect _playerTwoRect, sf::Vector2f _playerCenter, sf::Vector2f _playerTwoCenter, sf::Vector2f _colDepth, sf::Vector2f _playerPos, sf::Vector2f _playerVelocity)
-{
-	//Check collision depth
-	sf::Vector2f playerMinCenterDist = sf::Vector2f(_playerRect.width / 2 + _playerTwoRect.width / 2,
-		_playerRect.height / 2 + _playerTwoRect.height / 2);
-
-	sf::Vector2f distBtwnCenters = _playerTwoCenter - _playerCenter;
-
-	_colDepth = (distBtwnCenters - playerMinCenterDist);
-
-
-	//Change player pos to position before colliding
-	//playerPos = previousPos;
-
-	if (playerMinCenterDist.x < 0)
-	{
-		playerMinCenterDist.x = -playerMinCenterDist.x;
-	}
-	if (playerMinCenterDist.y < 0)
-	{
-		playerMinCenterDist.y = -playerMinCenterDist.y;
-	}
-
-	_colDepth = playerMinCenterDist - distBtwnCenters;
-
-
-	if (std::abs(_colDepth.y) < std::abs(_colDepth.x))
-	{
-		_playerPos.y -= _colDepth.y;
-		_playerVelocity.y = 0;
-	}
-	else
-	{
-		_playerPos.x -= _colDepth.x;
-		_playerVelocity.x = 0;
-	}
-	_playerVelocity = sf::Vector2f(0.0f, 0.0f);
-}
-
-void IntersectTwo(sf::FloatRect & _playerRect, sf::FloatRect & _playerTwoRect, sf::Vector2f & _playerCenter, sf::Vector2f & _playerTwoCenter, sf::Vector2f & _colDepth, sf::Vector2f & _playerPos, sf::Vector2f & _playerVelocity, sf::RectangleShape & _playerRectDisplay, sf::RectangleShape & _playerTwoRectDisplay)
+void Intersect(sf::FloatRect & _playerRect, sf::FloatRect & _playerTwoRect, sf::Vector2f & _playerCenter, sf::Vector2f & _playerTwoCenter, sf::Vector2f & _colDepth, sf::Vector2f & _playerPos, sf::Vector2f & _playerVelocity, sf::RectangleShape & _playerRectDisplay, sf::RectangleShape & _playerTwoRectDisplay)
 {
 	sf::Color fillcolor = sf::Color::Red;
 	fillcolor.a = 125;
