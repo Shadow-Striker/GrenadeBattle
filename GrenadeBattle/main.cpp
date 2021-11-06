@@ -25,7 +25,7 @@ int main()
 	
 	//Velocity
 	sf::Vector2f playerVelocity = sf::Vector2f(200.0f, 0.0f);
-	sf::Vector2f terminalVelocity = sf::Vector2f(0.0f, 20.0f);
+	sf::Vector2f terminalVelocity = sf::Vector2f(0.0f, 70.0f);
 	
 	//Gravity times 2 is being applied in playerAcceleration.
 	sf::Vector2f playerAcceleration = sf::Vector2f(0.0f, 0.0f);
@@ -60,7 +60,7 @@ int main()
 	sf::Sprite playerTwoSprite;
 	playerTwoSprite.setTexture(playerTexture);
 	playerTwoSprite.setScale(.1f, .1f);
-	sf::Vector2f playerTwoPosition = sf::Vector2f(300.0f, 200.0f);
+	sf::Vector2f playerTwoPosition = sf::Vector2f(500.0f, 200.0f);
 	playerTwoSprite.setPosition(playerTwoPosition);
 
 	//Velocity
@@ -91,7 +91,7 @@ int main()
 
 	//---- END OF PLAYER TWO CODE ----
 
-	float jumpForce = 100.0f;
+	float jumpForce = 300.0f;
 	float playerSpeed = 3000.0f;
 	//Constant
 	const float ACCEL_RATE = 7000.0f;
@@ -117,13 +117,14 @@ int main()
 		}
 
 		playerAcceleration.x = 0.0f;
-		playerAcceleration.y = 20.0f;
+		playerAcceleration.y = 120.0f;
 
 		playerTwoAcceleration.x = 0.0f;
-		playerTwoAcceleration.y = 20.0f;
+		playerTwoAcceleration.y = 120.0f;
 
 		PlayerOneInput(playerAcceleration, ACCEL_RATE, jumpForce);
 		PlayerTwoInput(playerTwoAcceleration, ACCEL_RATE, jumpForce);
+
 		if (event.type == sf::Event::KeyPressed)
 		{
 			if (event.key.code == sf::Keyboard::Escape)
