@@ -9,12 +9,32 @@ void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, fl
 void PlayerMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag);
 bool IntersectCheck(sf::Vector2f _spherePos, sf::Vector2f _otherPos, float _radius);
 void Intersect(sf::FloatRect & _playerRect, sf::FloatRect & _playerTwoRect, sf::Vector2f & _playerCenter, sf::Vector2f & _playerTwoCenter, sf::Vector2f & _colDepth, sf::Vector2f & _playerPos, sf::Vector2f & _playerVelocity, sf::RectangleShape & _playerRectDisplay, sf::RectangleShape & _playerTwoRectDisplay);
+void QuadEaseOut(sf::Vector2f & _change, float & _time, float & _duration, float & _deltaTime, sf::Vector2f & _begin, sf::Vector2f& _end, sf::Vector2f & _uiPosition);
 
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height), "Grenade Battle", sf::Style::Titlebar | sf::Style::Close);
 	sf::Texture playerTexture;
 	playerTexture.loadFromFile("Assets/Sprites/boy.png");
+
+
+	//INTERPOLATION
+	sf::Sprite uiSprite;
+	sf::Texture uiTexture;
+	uiTexture.loadFromFile("Assets/Sprites/UI Panel.png");
+	uiSprite.setTexture(uiTexture);
+	//uiSprite.setScale(.1f, .1f);
+	uiSprite.setOrigin(uiTexture.getSize().x / 2, uiTexture.getSize().y / 2);
+	sf::Vector2f uiPosition(0.0f, 0.0f);
+	uiSprite.setPosition(uiPosition);
+
+
+	sf::Vector2f end(sf::VideoMode::getDesktopMode().width / 2.0f, sf::VideoMode::getDesktopMode().height / 2.0f);
+	sf::Vector2f begin(sf::VideoMode::getDesktopMode().width / 2.0, sf::VideoMode::getDesktopMode().height);
+	sf::Vector2f change = end - begin;
+
+	float duration = 1.0f;
+	float time = 0.0f;	
 
 	//---- PLAYER ONE CODE ----
 	sf::Sprite playerSprite;
@@ -105,8 +125,6 @@ int main()
 
 	while (window.isOpen())
 	{
-		sf::Time frameTime = gameClock.restart();
-		float deltaTime = frameTime.asSeconds();
 
 		//INPUT
 		sf::Event event;
@@ -133,6 +151,11 @@ int main()
 			}
 		}
 		//UPDATE
+		//Game Clock
+		sf::Time frameTime = gameClock.restart();
+		float deltaTime = frameTime.asSeconds();
+		QuadEaseOut(change, time, duration, deltaTime, begin, end, uiPosition);
+		uiSprite.setPosition(uiPosition);
 		//Velocity code
 		PlayerMovement(playerVelocity, playerAcceleration, deltaTime, playerPosition, drag);
 		PlayerMovement(playerTwoVelocity, playerTwoAcceleration, deltaTime, playerTwoPosition, drag);
@@ -202,6 +225,7 @@ int main()
 		window.draw(playerTwoSprite);
 		window.draw(playerRectDisplay);
 		window.draw(playerTwoRectDisplay);
+		window.draw(uiSprite);
 		window.display();
 	}
 
@@ -304,5 +328,21 @@ void Intersect(sf::FloatRect & _playerRect, sf::FloatRect & _playerTwoRect, sf::
 
 		// Stop movement in y direction
 		_playerVelocity.y = 0;
+	}
+}
+
+void QuadEaseOut(sf::Vector2f& _change, float& _time, float& _duration, float& _deltaTime, sf::Vector2f& _begin, sf::Vector2f& _end, sf::Vector2f& _uiPosition)
+{
+	if (_time < _duration)
+	{
+		_time += _deltaTime;
+		sf::Vector2f k1 = _change / (3 * _duration * _duration);
+		sf::Vector2f k2 = (2.0f * _change * _time * _time) / (3 * _duration);
+		sf::Vector2f k3 = _begin;
+		_uiPosition = k1 * _time * _time + k2 * _time + k3;
+	}
+	else
+	{
+		_uiPosition = _end;
 	}
 }
