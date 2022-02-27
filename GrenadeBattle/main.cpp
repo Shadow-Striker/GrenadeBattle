@@ -17,6 +17,20 @@ int main()
 	sf::Texture playerTexture;
 	playerTexture.loadFromFile("Assets/Sprites/boy.png");
 
+	//SETUP OF PIPS
+
+	std::vector<sf::Sprite> pips;
+	sf::Texture pipTexture;
+	pipTexture.loadFromFile("Assets/Sprites/pip.png");
+	const int NUM_PIPS = 10;
+	for (size_t i = 0; i < NUM_PIPS; ++i)
+	{
+		sf::Sprite newPip;
+		newPip.setTexture(pipTexture);
+		newPip.setScale(1.0f, 1.0f);
+		newPip.setOrigin(pipTexture.getSize().x / 2, pipTexture.getSize().y / 2);
+		pips.push_back(newPip);
+	}
 
 	//INTERPOLATION
 	sf::Sprite uiSprite;
@@ -219,13 +233,29 @@ int main()
 			playerTwoRectDisplay.setFillColor(fillcolor);
 		}
 
+		//UPDATE PIPS
+		float pipTime = 0;
+		for (size_t i = 0; i < pips.size(); ++i)
+		{
+			pipTime += 0.1f; //Add 1/10th of a second
+			sf::Vector2f pipPosition;
+			pipPosition = sf::Vector2f(300, 1000) * pipTime * pipTime + sf::Vector2f(500, -1000) * pipTime + sf::Vector2f(500, 500);
+			pips[i].setPosition(pipPosition);
+		}
+
 
 		window.clear();
 		window.draw(playerSprite);
 		window.draw(playerTwoSprite);
 		window.draw(playerRectDisplay);
 		window.draw(playerTwoRectDisplay);
-		window.draw(uiSprite);
+		//window.draw(uiSprite);
+
+		for (size_t i = 0; i < pips.size(); ++i)
+		{
+			window.draw(pips[i]);
+		}
+
 		window.display();
 	}
 
@@ -343,6 +373,6 @@ void QuadEaseOut(sf::Vector2f& _change, float& _time, float& _duration, float& _
 	}
 	else
 	{
-		_uiPosition = _end;
+		_uiPosition = _end; 
 	}
 }
