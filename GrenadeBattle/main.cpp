@@ -11,6 +11,7 @@ bool IntersectCheck(sf::Vector2f _spherePos, sf::Vector2f _otherPos, float _radi
 void Intersect(sf::FloatRect & _playerRect, sf::FloatRect & _playerTwoRect, sf::Vector2f & _playerCenter, sf::Vector2f & _playerTwoCenter, sf::Vector2f & _colDepth, sf::Vector2f & _playerPos, sf::Vector2f & _playerVelocity, sf::RectangleShape & _playerRectDisplay, sf::RectangleShape & _playerTwoRectDisplay);
 void QuadEaseOut(sf::Vector2f & _change, float & _time, float & _duration, float & _deltaTime, sf::Vector2f & _begin, sf::Vector2f& _end, sf::Vector2f & _uiPosition);
 
+
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height), "Grenade Battle", sf::Style::Titlebar | sf::Style::Close);
@@ -31,6 +32,11 @@ int main()
 		newPip.setOrigin(pipTexture.getSize().x / 2, pipTexture.getSize().y / 2);
 		pips.push_back(newPip);
 	}
+
+	//Practical Task 3 - Gravity Prediction
+	sf::Vector2f initialVelocity(500, -1000);
+	sf::Vector2f initialPosition;
+	sf::Vector2f gravityVector(300, 1000);
 
 	//INTERPOLATION
 	sf::Sprite uiSprite;
@@ -234,12 +240,15 @@ int main()
 		}
 
 		//UPDATE PIPS
+		initialPosition = playerPosition;
 		float pipTime = 0;
 		for (size_t i = 0; i < pips.size(); ++i)
 		{
 			pipTime += 0.1f; //Add 1/10th of a second
 			sf::Vector2f pipPosition;
-			pipPosition = sf::Vector2f(300, 1000) * pipTime * pipTime + sf::Vector2f(500, -1000) * pipTime + sf::Vector2f(500, 500);
+			//pipPosition = sf::Vector2f(300, 1000) * pipTime * pipTime + sf::Vector2f(500, -1000) * pipTime + sf::Vector2f(500, 500);
+			//Practical Task 3 - Gravity Prediction
+			pipPosition = pipTime * initialVelocity + gravityVector * pipTime * pipTime + initialPosition;
 			pips[i].setPosition(pipPosition);
 		}
 
