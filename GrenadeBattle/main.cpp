@@ -240,6 +240,7 @@ int main()
 		}
 
 		//UPDATE PIPS
+		//Practical Task 3 - Gravity Prediction
 		initialPosition = playerPosition;
 		float pipTime = 0;
 		for (size_t i = 0; i < pips.size(); ++i)
