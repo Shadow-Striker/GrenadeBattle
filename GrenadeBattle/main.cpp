@@ -36,7 +36,9 @@ int main()
 	//Practical Task 3 - Gravity Prediction
 	sf::Vector2f initialVelocity(500, -1000);
 	sf::Vector2f initialPosition;
-	sf::Vector2f gravityVector(300, 1000);
+	sf::Vector2f gravityVector(0, 1000.0f);
+	sf::Vector2f firingDirection(1.0f, 0);
+	float firingSpeed = 750.0f;
 
 	//INTERPOLATION
 	sf::Sprite uiSprite;
@@ -242,6 +244,18 @@ int main()
 		//UPDATE PIPS
 		//Practical Task 3 - Gravity Prediction
 		initialPosition = playerPosition;
+
+		sf::Vector2f mousePosition = sf::Vector2f(sf::Mouse::getPosition(window));
+		firingDirection = mousePosition - playerPosition;
+
+		//Get the size of the vector (magnitude)
+		//Normalise firingDirection to size of 1. (unit vector)
+		float magnitude = sqrt(firingDirection.x * firingDirection.x + firingDirection.y * firingDirection.y);
+		firingDirection = firingDirection / magnitude;
+
+		//Initial velocity
+		initialVelocity = firingDirection * firingSpeed;
+
 		float pipTime = 0;
 		for (size_t i = 0; i < pips.size(); ++i)
 		{
@@ -249,7 +263,7 @@ int main()
 			sf::Vector2f pipPosition;
 			//pipPosition = sf::Vector2f(300, 1000) * pipTime * pipTime + sf::Vector2f(500, -1000) * pipTime + sf::Vector2f(500, 500);
 			//Practical Task 3 - Gravity Prediction
-			pipPosition = pipTime * initialVelocity + gravityVector * pipTime * pipTime + initialPosition;
+			pipPosition = pipTime * initialVelocity + (gravityVector * pipTime * pipTime) / 2.0f + initialPosition;
 			pips[i].setPosition(pipPosition);
 		}
 
