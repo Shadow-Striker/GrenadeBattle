@@ -6,7 +6,7 @@
 
 void PlayerOneInput(sf::Vector2f & _playerAcceleration, float _ACCEL_RATE, float & _jumpForce);
 void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, float & _jumpForce);
-void PlayerMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag);
+void PlayerMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float & _deltaTime, sf::Vector2f & _playerPosition, float & _drag);
 bool IntersectCheck(sf::Vector2f _spherePos, sf::Vector2f _otherPos, float _radius);
 void Intersect(sf::FloatRect & _playerRect, sf::FloatRect & _playerTwoRect, sf::Vector2f & _playerCenter, sf::Vector2f & _playerTwoCenter, sf::Vector2f & _colDepth, sf::Vector2f & _playerPos, sf::Vector2f & _playerVelocity, sf::RectangleShape & _playerRectDisplay, sf::RectangleShape & _playerTwoRectDisplay);
 void QuadEaseOut(sf::Vector2f & _change, float & _time, float & _duration, float & _deltaTime, sf::Vector2f & _begin, sf::Vector2f& _end, sf::Vector2f & _uiPosition);
@@ -66,7 +66,7 @@ int main()
 	playerSprite.setPosition(playerPosition);
 	
 	//Velocity
-	sf::Vector2f playerVelocity = sf::Vector2f(200.0f, 0.0f);
+	sf::Vector2f playerVelocity = sf::Vector2f(0.0f, 0.0f);
 	sf::Vector2f terminalVelocity = sf::Vector2f(0.0f, 70.0f);
 	
 	//Gravity times 2 is being applied in playerAcceleration.
@@ -156,14 +156,13 @@ int main()
 				window.close();
 		}
 
-		playerAcceleration.x = 0.0f;
+		//playerAcceleration.x = 0.0f;
 		playerAcceleration.y = 120.0f;
 
 		playerTwoAcceleration.x = 0.0f;
 		playerTwoAcceleration.y = 120.0f;
 
-		PlayerOneInput(playerAcceleration, ACCEL_RATE, jumpForce);
-		PlayerTwoInput(playerTwoAcceleration, ACCEL_RATE, jumpForce);
+
 
 		if (event.type == sf::Event::KeyPressed)
 		{
@@ -178,23 +177,55 @@ int main()
 		float deltaTime = frameTime.asSeconds();
 		QuadEaseOut(change, time, duration, deltaTime, begin, end, uiPosition);
 		uiSprite.setPosition(uiPosition);
-		//Velocity code
-		PlayerMovement(playerVelocity, playerAcceleration, deltaTime, playerPosition, drag);
-		PlayerMovement(playerTwoVelocity, playerTwoAcceleration, deltaTime, playerTwoPosition, drag);
 
-		if (playerPosition.y >= 500.0f)
+
+	
+		sf::Vector2f lastAcceleration = playerAcceleration;
+		sf::Vector2f lastVelocity = playerVelocity;
+		playerAcceleration.x = 0;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 		{
-			playerPosition.y = 500.0f;
+			playerAcceleration.x = -ACCEL_RATE;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		{
+			playerAcceleration.x = ACCEL_RATE;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+		{
+			playerAcceleration.y = -jumpForce;
 		}
 
-		if (playerTwoPosition.y >= 500.0f)
-		{
-			playerTwoPosition.y = 500.0f;
-		}
+		//NUMERICAL INTEGRATION ASSESSMENT (PLEASE COMMENT OUT EACH METHOD)
+		//---EXPLICIT EULER--- (Uses previous frame's values in current frame's calculations
+		/*playerVelocity += lastAcceleration * deltaTime;
+		playerVelocity = 0.9f * playerVelocity;
+		playerPosition += lastVelocity * deltaTime;*/
+		//END OF EXPLICIT EULER
+		
+		//IMPLICIT EULER
+		/*playerVelocity += playerAcceleration * deltaTime;
+		playerVelocity = 0.9f * playerVelocity;
+		playerPosition += playerVelocity * deltaTime;*/
+		//END OF IMPLICIT EULER
+
+		//SEMI IMPLICIT EULER
+		/*playerVelocity += lastAcceleration * deltaTime;
+		playerVelocity = 0.9f * playerVelocity;
+		playerPosition += playerVelocity * deltaTime;*/
+		//END OF SEMI IMPLICIT EULER
+
+		//VELOCITY VERLET
+		sf::Vector2f firstHalfVel = lastVelocity + lastAcceleration * (0.5f * deltaTime);
+		firstHalfVel = 0.9f * firstHalfVel; // drag
+		playerPosition += firstHalfVel * deltaTime;
+		playerVelocity = firstHalfVel + playerAcceleration * (deltaTime * 0.5f);
+
+		if (playerPosition.y >= 500.0f) playerPosition.y = 500.0f;		
+		if (playerTwoPosition.y >= 500.0f) playerTwoPosition.y = 500.0f;
 
 		playerSprite.setPosition(playerPosition);
 		playerTwoSprite.setPosition(playerTwoPosition);
-
 		playerCenter = playerPosition + 0.5f * spriteSize;
 		playerTwoCenter = playerTwoPosition + 0.5f * spriteSize;
 
@@ -288,6 +319,7 @@ int main()
 
 void PlayerOneInput(sf::Vector2f & _playerAcceleration, float _ACCEL_RATE, float & _jumpForce)
 {
+	_playerAcceleration.x = 0;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
 	    _playerAcceleration.x = -_ACCEL_RATE;
@@ -304,6 +336,7 @@ void PlayerOneInput(sf::Vector2f & _playerAcceleration, float _ACCEL_RATE, float
 
 void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, float & _jumpForce)
 {
+	_playerTwoAcceleration.x = 0;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
 		_playerTwoAcceleration.x = -_ACCEL_RATE;
@@ -318,15 +351,15 @@ void PlayerTwoInput(sf::Vector2f & _playerTwoAcceleration, float _ACCEL_RATE, fl
 	}
 }
 
-void PlayerMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float _deltaTime, sf::Vector2f & _playerPosition, float _drag)
+void PlayerMovement(sf::Vector2f & _playerVelocity, sf::Vector2f & _playerAcceleration, float & _deltaTime, sf::Vector2f & _playerPosition, float & _drag)
 {
+	//std::cout << "After swap, value of b :" << std::endl;
+	sf::Vector2f deltaPosition = _playerVelocity * _deltaTime;
+	_playerPosition += deltaPosition;
 	sf::Vector2f deltaVelocity = _playerAcceleration * _deltaTime;
 	_playerVelocity += deltaVelocity;
 	_playerVelocity.x = _playerVelocity.x * _drag;
 
-	sf::Vector2f deltaPosition = _playerVelocity * _deltaTime;
-
-	_playerPosition += deltaPosition;
 }
 
 bool IntersectCheck(sf::Vector2f _spherePos, sf::Vector2f _otherPos, float _radius)
