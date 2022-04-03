@@ -196,7 +196,7 @@ int main()
 			playerAcceleration.y = -jumpForce;
 		}
 
-		//NUMERICAL INTEGRATION ASSESSMENT (PLEASE COMMENT OUT EACH METHOD)
+		//Practical Task 4 - Physics Alternatives (PLEASE COMMENT OUT EACH METHOD)
 		//---EXPLICIT EULER--- (Uses previous frame's values in current frame's calculations
 		/*playerVelocity += lastAcceleration * deltaTime;
 		playerVelocity = 0.9f * playerVelocity;
@@ -216,10 +216,11 @@ int main()
 		//END OF SEMI IMPLICIT EULER
 
 		//VELOCITY VERLET
-		sf::Vector2f firstHalfVel = lastVelocity + lastAcceleration * (0.5f * deltaTime);
+		/*sf::Vector2f firstHalfVel = lastVelocity + lastAcceleration * (0.5f * deltaTime);
 		firstHalfVel = 0.9f * firstHalfVel; // drag
 		playerPosition += firstHalfVel * deltaTime;
-		playerVelocity = firstHalfVel + playerAcceleration * (deltaTime * 0.5f);
+		playerVelocity = firstHalfVel + playerAcceleration * (deltaTime * 0.5f);*/
+		//END OF VELOCITY VERLET
 
 		if (playerPosition.y >= 500.0f) playerPosition.y = 500.0f;		
 		if (playerTwoPosition.y >= 500.0f) playerTwoPosition.y = 500.0f;
