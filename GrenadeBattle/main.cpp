@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <Math.h>
+#include "VectorHelper.h"
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <string>
@@ -33,11 +34,35 @@ int main()
 		pips.push_back(newPip);
 	}
 
+	//Grenade
+	sf::Texture grenadeTexture;
+	grenadeTexture.loadFromFile("Assets/Sprites/grenade.png");
+	sf::Sprite grenadeSprite;
+	grenadeSprite.setTexture(grenadeTexture);
+	sf::Vector2f grenadeVelocity(0.0f, 0.0f);
+
+	//Crate
+	sf::Texture crateTexture;
+	crateTexture.loadFromFile("Assets/Sprites/crate.png");
+	const int NUM_CRATES = 30;
+	std::vector<sf::Sprite> crateSprites;
+	for (size_t i = 0; i < NUM_CRATES; i++)
+	{
+		crateSprites.push_back(sf::Sprite());
+		crateSprites[i].setTexture(crateTexture);
+		crateSprites[i].setPosition(i * 55, 500);
+	}
+	sf::Vector2f crateSpriteSize;
+	crateSpriteSize.x = crateTexture.getSize().x;
+	crateSpriteSize.y = crateTexture.getSize().y;
+
 	//Practical Task 3 - Gravity Prediction
 	sf::Vector2f initialVelocity(500, -1000);
 	sf::Vector2f initialPosition;
 	sf::Vector2f gravityVector(0, 1000.0f);
 	sf::Vector2f firingDirection(1.0f, 0);
+	sf::Vector2f firingPosition(500, 500);
+	sf::Vector2f firingVelocity(5000.0f, -500.0f);
 	float firingSpeed = 750.0f;
 
 	//INTERPOLATION
@@ -56,19 +81,22 @@ int main()
 	sf::Vector2f change = end - begin;
 
 	float duration = 1.0f;
-	float time = 0.0f;	
+	float time = 0.0f;
 
 	//---- PLAYER ONE CODE ----
 	sf::Sprite playerSprite;
 	playerSprite.setTexture(playerTexture);
-	playerSprite.setScale(.1f, .1f);	
+	playerSprite.setScale(.1f, .1f);
 	sf::Vector2f playerPosition = sf::Vector2f(300.0f, 200.0f);
 	playerSprite.setPosition(playerPosition);
-	
+
 	//Velocity
 	sf::Vector2f playerVelocity = sf::Vector2f(0.0f, 0.0f);
 	sf::Vector2f terminalVelocity = sf::Vector2f(0.0f, 70.0f);
-	
+
+	//Gravity
+	sf::Vector2f gravity = sf::Vector2f(0.0f, 750.0f);
+
 	//Gravity times 2 is being applied in playerAcceleration.
 	sf::Vector2f playerAcceleration = sf::Vector2f(0.0f, 0.0f);
 
@@ -110,12 +138,12 @@ int main()
 
 	//Gravity times 2 is being applied in playerAcceleration.
 	sf::Vector2f playerTwoAcceleration = sf::Vector2f(0.0f, 0.0f);
-	
+
 	//Bounding Boxes
 	sf::Vector2f playerTwoBoundsOffset(0.0f, 0.0f);
 	sf::Vector2f playerTwoBoundsScale(1.0f, 1.0f);
 
-	
+
 	//Bounding Circle
 	/*float playerTwoCircleRadius = playerTexture.getSize().x / 2;
 	sf::Vector2f playerTwoCircleCentre = playerTwoPosition + 0.5f * spriteSize;
@@ -143,11 +171,10 @@ int main()
 	sf::Vector2f colDepth = sf::Vector2f(0.0f, 0.0f);
 	sf::Vector2f previousPos = sf::Vector2f(0.0f, 0.0f);
 
-	sf::Clock gameClock; 
+	sf::Clock gameClock;
 
 	while (window.isOpen())
 	{
-
 		//INPUT
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -156,13 +183,10 @@ int main()
 				window.close();
 		}
 
-		//playerAcceleration.x = 0.0f;
+		playerAcceleration.x = 0.0f;
 		playerAcceleration.y = 120.0f;
-
 		playerTwoAcceleration.x = 0.0f;
 		playerTwoAcceleration.y = 120.0f;
-
-
 
 		if (event.type == sf::Event::KeyPressed)
 		{
@@ -171,7 +195,6 @@ int main()
 				window.close();
 			}
 		}
-		//UPDATE
 		//Game Clock
 		sf::Time frameTime = gameClock.restart();
 		float deltaTime = frameTime.asSeconds();
@@ -179,7 +202,7 @@ int main()
 		uiSprite.setPosition(uiPosition);
 
 
-	
+
 		sf::Vector2f lastAcceleration = playerAcceleration;
 		sf::Vector2f lastVelocity = playerVelocity;
 		playerAcceleration.x = 0;
@@ -195,6 +218,36 @@ int main()
 		{
 			playerAcceleration.y = -jumpForce;
 		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+		{
+			grenadeSprite.setPosition(firingPosition);
+			grenadeVelocity = firingVelocity;
+		}
+
+		//UPDATE 
+		firingPosition = playerSprite.getPosition();
+		firingVelocity = sf::Vector2f(sf::Mouse::getPosition(window)) - firingPosition;
+
+		// Normalize the velocity
+		float mag = sqrt(firingVelocity.x * firingVelocity.x + firingVelocity.y * firingVelocity.y);
+		firingVelocity /= mag;
+
+		// Scale velocity by speed
+		firingVelocity *= firingSpeed;
+		
+		playerTwoAcceleration.x = 0;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		{
+			playerTwoAcceleration.x = -ACCEL_RATE;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+		{
+			playerTwoAcceleration.x = ACCEL_RATE;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+		{
+			playerTwoAcceleration.y = -jumpForce;
+		}
 
 		//Practical Task 4 - Physics Alternatives (PLEASE COMMENT OUT EACH METHOD)
 		//---EXPLICIT EULER--- (Uses previous frame's values in current frame's calculations
@@ -202,7 +255,7 @@ int main()
 		playerVelocity = 0.9f * playerVelocity;
 		playerPosition += lastVelocity * deltaTime;*/
 		//END OF EXPLICIT EULER
-		
+
 		//IMPLICIT EULER
 		/*playerVelocity += playerAcceleration * deltaTime;
 		playerVelocity = 0.9f * playerVelocity;
@@ -222,8 +275,21 @@ int main()
 		playerVelocity = firstHalfVel + playerAcceleration * (deltaTime * 0.5f);*/
 		//END OF VELOCITY VERLET
 
-		if (playerPosition.y >= 500.0f) playerPosition.y = 500.0f;		
+		if (playerPosition.y >= 500.0f) playerPosition.y = 500.0f;
 		if (playerTwoPosition.y >= 500.0f) playerTwoPosition.y = 500.0f;
+
+
+		sf::Vector2f deltaPosition = playerVelocity * deltaTime;
+		playerPosition += deltaPosition;
+		sf::Vector2f deltaVelocity = playerAcceleration * deltaTime;
+		playerVelocity += deltaVelocity;
+		playerVelocity.x = playerVelocity.x * drag;
+
+		sf::Vector2f deltaPositionTwo = playerTwoVelocity * deltaTime;
+		playerTwoPosition += deltaPositionTwo;
+		sf::Vector2f deltaVelocityTwo = playerTwoAcceleration * deltaTime;
+		playerTwoVelocity += deltaVelocityTwo;
+		playerTwoVelocity.x = playerTwoVelocity.x * drag;
 
 		playerSprite.setPosition(playerPosition);
 		playerTwoSprite.setPosition(playerTwoPosition);
@@ -264,7 +330,7 @@ int main()
 			playerSprite.setPosition(playerPosition);
 			playerTwoSprite.setPosition(playerTwoPosition);
 		}
-		else 
+		else
 		{
 			sf::Color fillcolor = sf::Color::Green;
 			fillcolor.a = 125;
@@ -275,15 +341,16 @@ int main()
 
 		//UPDATE PIPS
 		//Practical Task 3 - Gravity Prediction
+		//Update projectile prediction values (MIGHT NEED THIS!)
 		initialPosition = playerPosition;
 
 		sf::Vector2f mousePosition = sf::Vector2f(sf::Mouse::getPosition(window));
-		firingDirection = mousePosition - playerPosition;
+		firingDirection = mousePosition - initialPosition;
 
 		//Get the size of the vector (magnitude)
 		//Normalise firingDirection to size of 1. (unit vector)
 		float magnitude = sqrt(firingDirection.x * firingDirection.x + firingDirection.y * firingDirection.y);
-		firingDirection = firingDirection / magnitude;
+		firingDirection /= magnitude;
 
 		//Initial velocity
 		initialVelocity = firingDirection * firingSpeed;
@@ -299,6 +366,73 @@ int main()
 			pips[i].setPosition(pipPosition);
 		}
 
+		grenadeVelocity += gravity * frameTime.asSeconds();
+		grenadeSprite.setPosition(grenadeSprite.getPosition() + grenadeVelocity * frameTime.asSeconds());
+
+		for (int i = 0; i < crateSprites.size(); ++i)
+		{
+			sf::FloatRect crateRect = crateSprites[i].getGlobalBounds();
+			sf::Vector2f crateCenter = crateSprites[i].getPosition() + 0.5f * crateSpriteSize;
+			sf::FloatRect grenadeRect = grenadeSprite.getGlobalBounds();
+			sf::FloatRect playerRect = playerSprite.getGlobalBounds();
+			sf::FloatRect playerTwoRect = playerTwoSprite.getGlobalBounds();
+
+			sf::Vector2f normal;
+
+			if (playerRect.intersects(crateRect))
+			{
+				Intersect(playerRect, crateRect, playerCenter, crateCenter, colDepth, playerPosition, playerVelocity, playerRectDisplay, playerTwoRectDisplay);
+			}
+
+			//"Practical Task 5 - Reflection"
+			if (crateRect.intersects(grenadeRect))
+			{
+				//Ricochet
+				//Find the side of collision using our collision depth
+				sf::Vector2f depth = CollisionDepth(grenadeRect, crateRect);
+				sf::Vector2f absDepth = sf::Vector2f(abs(depth.x), abs(depth.y));
+				if (absDepth.x < absDepth.y)
+				{
+					sf::Vector2f grenadePos = grenadeSprite.getPosition();
+					grenadePos.x += depth.x;
+					grenadeSprite.setPosition(grenadePos);
+
+					//Are we colliding from the left or right
+					if (depth.x > 0) //colliding from the left
+					{
+						//set the normal vector
+						normal = sf::Vector2f(-1, 0);
+					}
+					else //Colliding from the right
+					{
+						normal = sf::Vector2f(1, 0);
+					}
+				}
+				else //Colliding in the y direction
+				{
+					//Move out of the collision first of all
+					sf::Vector2f grenadePos = grenadeSprite.getPosition();
+					grenadePos.y += depth.y;
+					grenadeSprite.setPosition(grenadePos);
+
+					if (depth.y > 0)
+					{
+						normal = sf::Vector2f(0, -1);
+					}
+					else
+					{
+						normal = sf::Vector2f(0, 1);
+					}
+				}
+				//"Practical Task 5 - Reflection"
+				//Apply the reflection equation
+			//R = I - 2N(I * N)
+			//R = out going velocity
+			//I = incoming velocity
+			//Normal vector
+				grenadeVelocity = grenadeVelocity - 2.0f * normal * (VectorDot(grenadeVelocity, normal));
+			}		
+		}
 
 		window.clear();
 		window.draw(playerSprite);
@@ -312,11 +446,18 @@ int main()
 			window.draw(pips[i]);
 		}
 
+		for (size_t i = 0; i < NUM_CRATES; ++i)
+		{
+			window.draw(crateSprites[i]);
+		}
+
+		window.draw(grenadeSprite);
+
 		window.display();
 	}
-
 	return 0;
 }
+
 
 void PlayerOneInput(sf::Vector2f & _playerAcceleration, float _ACCEL_RATE, float & _jumpForce)
 {
